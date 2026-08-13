@@ -1,0 +1,293 @@
+{
+  "cases": [
+    {
+      "id": "spirits_clean",
+      "title": "Bourbon — everything matches",
+      "image": "/samples/old-tom.png",
+      "notes": "Clean distilled spirits label. All application fields agree with the artwork, including the statutory warning.",
+      "application": {
+        "brandName": "Old Tom Distillery",
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "45% Alc./Vol. (90 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Old Tom Distillery, Frankfort, KY",
+        "productType": "distilled_spirits"
+      },
+      "extraction": {
+        "brandName": "OLD TOM DISTILLERY",
+        "fancifulName": null,
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "45% Alc./Vol. (90 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Old Tom Distillery, Frankfort, KY",
+        "countryOfOrigin": null,
+        "warningText": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warningAllCapsPrefix": true,
+        "readable": true
+      },
+      "expected": {
+        "overall": "match",
+        "fields": {
+          "brandName": "match",
+          "classType": "match",
+          "alcoholContent": "match",
+          "netContents": "match",
+          "bottlerNameAddress": "match"
+        },
+        "warning": "match"
+      }
+    },
+    {
+      "id": "brand_casing",
+      "title": "Brand name casing only (Stone's Throw)",
+      "image": "/samples/stones-throw.png",
+      "notes": "Dave Morrison example: STONE'S THROW on the label vs Stone's Throw on the application should match.",
+      "application": {
+        "brandName": "Stone's Throw",
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "45% Alc./Vol. (90 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Stone's Throw Distillery, Frankfort, KY",
+        "productType": "distilled_spirits"
+      },
+      "extraction": {
+        "brandName": "STONE'S THROW",
+        "fancifulName": null,
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "45% Alc./Vol. (90 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Stone's Throw Distillery, Frankfort, KY",
+        "countryOfOrigin": null,
+        "warningText": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warningAllCapsPrefix": true,
+        "readable": true
+      },
+      "expected": {
+        "overall": "match",
+        "fields": {
+          "brandName": "match",
+          "classType": "match",
+          "alcoholContent": "match",
+          "netContents": "match",
+          "bottlerNameAddress": "match"
+        },
+        "warning": "match"
+      }
+    },
+    {
+      "id": "abv_mismatch",
+      "title": "Wrong alcohol content",
+      "image": "/samples/old-tom.png",
+      "notes": "Same Old Tom label; application lists 40% instead of 45%.",
+      "application": {
+        "brandName": "Old Tom Distillery",
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "40% Alc./Vol. (80 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Old Tom Distillery, Frankfort, KY",
+        "productType": "distilled_spirits"
+      },
+      "extraction": {
+        "brandName": "OLD TOM DISTILLERY",
+        "fancifulName": null,
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "45% Alc./Vol. (90 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Old Tom Distillery, Frankfort, KY",
+        "countryOfOrigin": null,
+        "warningText": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warningAllCapsPrefix": true,
+        "readable": true
+      },
+      "expected": {
+        "overall": "fail",
+        "fields": {
+          "brandName": "match",
+          "classType": "match",
+          "alcoholContent": "fail",
+          "netContents": "match",
+          "bottlerNameAddress": "match"
+        },
+        "warning": "match"
+      }
+    },
+    {
+      "id": "warning_title_case",
+      "title": "Warning in title case",
+      "image": "/samples/old-tom-title-case-warning.png",
+      "notes": "Jenny Park example: Government Warning in title case must fail.",
+      "application": {
+        "brandName": "Old Tom Distillery",
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "45% Alc./Vol. (90 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Old Tom Distillery, Frankfort, KY",
+        "productType": "distilled_spirits"
+      },
+      "extraction": {
+        "brandName": "OLD TOM DISTILLERY",
+        "fancifulName": null,
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "45% Alc./Vol. (90 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Old Tom Distillery, Frankfort, KY",
+        "countryOfOrigin": null,
+        "warningText": "Government Warning: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warningAllCapsPrefix": false,
+        "readable": true
+      },
+      "expected": {
+        "overall": "fail",
+        "fields": {
+          "brandName": "match",
+          "classType": "match",
+          "alcoholContent": "match",
+          "netContents": "match",
+          "bottlerNameAddress": "match"
+        },
+        "warning": "fail"
+      }
+    },
+    {
+      "id": "warning_missing",
+      "title": "Warning missing from the image",
+      "image": "/samples/old-tom-no-warning.png",
+      "notes": "Front panel only, no government warning printed.",
+      "application": {
+        "brandName": "Old Tom Distillery",
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "45% Alc./Vol. (90 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Old Tom Distillery, Frankfort, KY",
+        "productType": "distilled_spirits"
+      },
+      "extraction": {
+        "brandName": "OLD TOM DISTILLERY",
+        "fancifulName": null,
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "45% Alc./Vol. (90 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Old Tom Distillery, Frankfort, KY",
+        "countryOfOrigin": null,
+        "warningText": null,
+        "warningAllCapsPrefix": null,
+        "readable": true
+      },
+      "expected": {
+        "overall": "fail",
+        "fields": {
+          "brandName": "match",
+          "classType": "match",
+          "alcoholContent": "match",
+          "netContents": "match",
+          "bottlerNameAddress": "match"
+        },
+        "warning": "fail"
+      }
+    },
+    {
+      "id": "wine_clean",
+      "title": "Wine — everything matches",
+      "image": "/samples/river-bench.png",
+      "notes": "Wine label with 750 mL shown as 75 cl on the artwork; volumes should still match.",
+      "application": {
+        "brandName": "River Bench Vineyards",
+        "classType": "Cabernet Sauvignon",
+        "alcoholContent": "13.5% Alc. by Vol.",
+        "netContents": "750 mL",
+        "countryOfOrigin": "United States",
+        "productType": "wine"
+      },
+      "extraction": {
+        "brandName": "RIVER BENCH VINEYARDS",
+        "fancifulName": null,
+        "classType": "Cabernet Sauvignon",
+        "alcoholContent": "13.5% Alc. by Vol.",
+        "netContents": "75 cl",
+        "bottlerNameAddress": null,
+        "countryOfOrigin": "United States",
+        "warningText": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warningAllCapsPrefix": true,
+        "readable": true
+      },
+      "expected": {
+        "overall": "match",
+        "fields": {
+          "brandName": "match",
+          "classType": "match",
+          "alcoholContent": "match",
+          "netContents": "match",
+          "countryOfOrigin": "match"
+        },
+        "warning": "match"
+      }
+    },
+    {
+      "id": "beer_abv_optional",
+      "title": "Beer — ABV on the form, not on the label",
+      "image": "/samples/harbor-light.png",
+      "notes": "Malt beverage labels may omit alcohol content. This should need review, not fail.",
+      "application": {
+        "brandName": "Harbor Light",
+        "classType": "Pale Ale",
+        "alcoholContent": "5.4% Alc./Vol.",
+        "netContents": "12 fl oz",
+        "productType": "malt_beverage"
+      },
+      "extraction": {
+        "brandName": "Harbor Light",
+        "fancifulName": null,
+        "classType": "Pale Ale",
+        "alcoholContent": null,
+        "netContents": "12 fl. oz.",
+        "bottlerNameAddress": null,
+        "countryOfOrigin": null,
+        "warningText": "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.",
+        "warningAllCapsPrefix": true,
+        "readable": true
+      },
+      "expected": {
+        "overall": "needs_review",
+        "fields": {
+          "brandName": "match",
+          "classType": "match",
+          "alcoholContent": "needs_review",
+          "netContents": "match"
+        },
+        "warning": "match"
+      }
+    },
+    {
+      "id": "unreadable",
+      "title": "Glare — cannot read the label",
+      "image": "/samples/old-tom-glare.png",
+      "notes": "Unreadable photo. Overall needs review; do not mark fields as fail.",
+      "application": {
+        "brandName": "Old Tom Distillery",
+        "classType": "Kentucky Straight Bourbon Whiskey",
+        "alcoholContent": "45% Alc./Vol. (90 Proof)",
+        "netContents": "750 mL",
+        "bottlerNameAddress": "Old Tom Distillery, Frankfort, KY",
+        "productType": "distilled_spirits"
+      },
+      "extraction": {
+        "brandName": null,
+        "fancifulName": null,
+        "classType": null,
+        "alcoholContent": null,
+        "netContents": null,
+        "bottlerNameAddress": null,
+        "countryOfOrigin": null,
+        "warningText": null,
+        "warningAllCapsPrefix": null,
+        "readable": false,
+        "notes": "glare"
+      },
+      "expected": {
+        "overall": "needs_review",
+        "fields": {},
+        "warning": "needs_review"
+      }
+    }
+  ]
+}

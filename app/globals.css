@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-source-sans), "Source Sans 3", "Segoe UI", sans-serif;
+  --color-paper: #f4efe4;
+  --color-navy-700: #1d4f8c;
+  --color-navy-800: #163a68;
+  --color-navy-900: #102a4c;
+}
+
+html {
+  font-family: var(--font-sans);
+  background: var(--color-paper);
+  color: #1c1917;
+}
+
+body {
+  background: var(--color-paper);
+  color: #1c1917;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
