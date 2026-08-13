@@ -37,7 +37,23 @@ function wrap(text, width) {
   return lines;
 }
 
-function warningBlock(text, y) {
+function warningBlock(text, y, options = {}) {
+  const titleCase = Boolean(options.titleCase);
+  if (titleCase) {
+    const body = text.replace(/^Government Warning:\s*/i, "");
+    const lines = wrap(body, 52);
+    const bodySpans = lines
+      .map(
+        (line, index) =>
+          `<tspan x="80" dy="${index === 0 ? 0 : 22}">${escapeXml(line)}</tspan>`,
+      )
+      .join("");
+    return `
+    <text x="80" y="${y}" font-family="Georgia, serif" font-size="24" fill="#1a1a1a">Government Warning:</text>
+    <text x="80" y="${y + 36}" font-family="Georgia, serif" font-size="16" fill="#1a1a1a">${bodySpans}</text>
+  `;
+  }
+
   const lines = wrap(text, 52);
   const tspans = lines
     .map(
@@ -60,6 +76,7 @@ function labelSvg({
   volume,
   extra,
   warning,
+  warningTitleCase,
 }) {
   const extraLine = extra
     ? `<text x="400" y="760" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#1a1a1a">${escapeXml(extra)}</text>`
@@ -85,18 +102,27 @@ function labelSvg({
   ${alcoholLine}
   <text x="400" y="730" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#1a1a1a">${escapeXml(volume)}</text>
   ${extraLine}
-  ${warning ? warningBlock(warning, warningY) : ""}
+  ${warning ? warningBlock(warning, warningY, { titleCase: warningTitleCase }) : ""}
 </svg>`;
 }
 
-async function writePng(name, svg, overlay) {
-  let image = sharp(Buffer.from(svg)).png();
+async function writePng(name, svg, options = {}) {
+  const { overlay, blur, veil } = options;
+  let image = sharp(Buffer.from(svg));
   if (overlay) {
-    image = sharp(Buffer.from(svg))
-      .composite([{ input: Buffer.from(overlay), blend: "over" }])
-      .png();
+    image = image.composite([{ input: Buffer.from(overlay), blend: "over" }]);
   }
-  const buffer = await image.toBuffer();
+  if (blur) {
+    image = image.blur(blur);
+  }
+  if (veil) {
+    const veilSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200">
+  <rect width="800" height="1200" fill="#ffffff" opacity="${veil}"/>
+</svg>`;
+    image = image.composite([{ input: Buffer.from(veilSvg), blend: "over" }]);
+  }
+  const buffer = await image.png().toBuffer();
   await sharp(buffer).toFile(path.join(publicDir, name));
   await sharp(buffer).toFile(path.join(fixtureDir, name));
   console.log("wrote", name);
@@ -105,15 +131,16 @@ async function writePng(name, svg, overlay) {
 const glareOverlay = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200">
   <defs>
-    <radialGradient id="g" cx="50%" cy="40%" r="45%">
+    <radialGradient id="g" cx="50%" cy="42%" r="70%">
       <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
-      <stop offset="55%" stop-color="#ffffff" stop-opacity="0.85"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.2"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.75"/>
     </radialGradient>
   </defs>
   <rect width="800" height="1200" fill="url(#g)"/>
-  <rect x="120" y="180" width="560" height="70" fill="#ffffff" opacity="0.9" transform="rotate(-12 400 215)"/>
-  <rect x="90" y="520" width="620" height="90" fill="#ffffff" opacity="0.95" transform="rotate(8 400 565)"/>
+  <rect x="40" y="140" width="720" height="160" fill="#ffffff" opacity="0.95" transform="rotate(-8 400 220)"/>
+  <rect x="30" y="480" width="740" height="220" fill="#ffffff" opacity="0.97" transform="rotate(6 400 590)"/>
+  <rect x="60" y="820" width="680" height="180" fill="#ffffff" opacity="0.95" transform="rotate(-4 400 910)"/>
 </svg>`;
 
 const labels = {
@@ -149,6 +176,7 @@ const labels = {
     volume: "750 mL",
     extra: "Old Tom Distillery, Frankfort, KY",
     warning: TITLE_WARNING,
+    warningTitleCase: true,
   }),
   "old-tom-no-warning.png": labelSvg({
     background: "#f3e6c8",
@@ -169,7 +197,7 @@ const labels = {
     classType: "Cabernet Sauvignon",
     alcohol: "13.5% Alc. by Vol.",
     volume: "75 cl",
-    extra: "United States",
+    extra: "Product of the United States",
     warning: WARNING,
   }),
   "harbor-light.png": labelSvg({
@@ -193,7 +221,11 @@ async function main() {
     await writePng(name, svg);
   }
 
-  await writePng("old-tom-glare.png", labels["old-tom.png"], glareOverlay);
+  await writePng("old-tom-glare.png", labels["old-tom.png"], {
+    overlay: glareOverlay,
+    blur: 16,
+    veil: 0.82,
+  });
 }
 
 main().catch((error) => {

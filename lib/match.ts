@@ -3,6 +3,7 @@ import {
   blankToNull,
   nameSimilarity,
   normalizeName,
+  normalizeOrigin,
   oneContainsTheOther,
   parseAlcohol,
   volumesMatch,
@@ -62,6 +63,7 @@ function compareNames(
   }
 
   if (!application && label) {
+    if (!options.required) return null;
     return result(
       field,
       "needs_review",
@@ -74,6 +76,19 @@ function compareNames(
   if (!application || !label) return null;
 
   if (normalizeName(application) === normalizeName(label)) {
+    return result(
+      field,
+      "match",
+      application,
+      label,
+      "The names match.",
+    );
+  }
+
+  if (
+    field === "countryOfOrigin" &&
+    normalizeOrigin(application) === normalizeOrigin(label)
+  ) {
     return result(
       field,
       "match",
@@ -242,6 +257,22 @@ function compareVolume(
   );
 }
 
+function countryFromExtract(
+  application: ApplicationFields,
+  extracted: ExtractedLabel,
+): string | null {
+  const country = blankToNull(extracted.countryOfOrigin);
+  if (country) return country;
+
+  const appCountry = blankToNull(application.countryOfOrigin);
+  const bottler = blankToNull(extracted.bottlerNameAddress);
+  if (appCountry && bottler && nameSimilarity(appCountry, bottler) >= 0.9) {
+    return bottler;
+  }
+
+  return null;
+}
+
 function overallStatus(parts: FieldResult[]): CheckStatus {
   if (parts.some((part) => part.status === "fail")) return "fail";
   if (parts.some((part) => part.status === "needs_review")) return "needs_review";
@@ -300,7 +331,7 @@ export function matchLabel(
     compareNames(
       "countryOfOrigin",
       application.countryOfOrigin ?? null,
-      extracted.countryOfOrigin,
+      countryFromExtract(application, extracted),
       { required: false, containCountsAsMatch: false },
     ),
   ].filter((field): field is FieldResult => field != null);

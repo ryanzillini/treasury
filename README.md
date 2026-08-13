@@ -21,7 +21,7 @@ Set `VISION_PROVIDER` to `openai` (default), `google`, or `anthropic`, and provi
 
 | Provider | Env var | Model |
 |---|---|---|
-| `openai` | `OPENAI_API_KEY` | `gpt-4o` |
+| `openai` | `OPENAI_API_KEY` | `gpt-5-nano` |
 | `google` | `GOOGLE_GENERATIVE_AI_API_KEY` | `gemini-2.5-flash` |
 | `anthropic` | `ANTHROPIC_API_KEY` | `claude-sonnet-4-5` |
 
@@ -38,6 +38,14 @@ npx vercel --prod
 ```
 
 Set the same env vars in the Vercel project. The verify route is capped at 15 seconds.
+
+## How to review
+
+Open [https://ttb-label-check-beta.vercel.app](https://ttb-label-check-beta.vercel.app). Use **Load a sample**, then press **Check label**. Each sample shows what it should return.
+
+Confirm the footer says `openai (gpt-5-nano)`, not `fixture (recorded)`. That means the photo was read, not the recorded text. Results should come back in about five seconds.
+
+The government warning is not a field on the application form. It is checked against [27 CFR 16.21](https://www.law.cornell.edu/cfr/text/27/16.21).
 
 ## Approach
 
@@ -91,6 +99,7 @@ See [fixtures/README.md](fixtures/README.md) for how they were made.
 
 - This is a proof of concept, not a legal determination and not COLAs Online.
 - The warning may be on a back or neck label. If it is not in the uploaded image, the app says so.
+- There is no warning field on the application form. Jenny’s check is label vs statute.
 - Bold type on `GOVERNMENT WARNING` is not checked.
 - Beer alcohol content is treated as optional on the label.
 - Batch upload is not built. The same extract-then-match function could run over a folder later; a working core mattered more.

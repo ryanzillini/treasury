@@ -42,6 +42,12 @@ const STATUS_COPY: Record<
   },
 };
 
+const SAMPLE_EXPECTED: Record<CheckStatus, string> = {
+  match: "This sample should come back as Match.",
+  fail: "This sample should come back as Does not match.",
+  needs_review: "This sample should come back as Needs review.",
+};
+
 function fileFromUrl(url: string, filename: string): Promise<File> {
   return fetch(url)
     .then((response) => {
@@ -158,6 +164,8 @@ export function LabelCheck() {
     }
   }
 
+  const selectedSample = FIXTURES.find((fixture) => fixture.id === sampleId);
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-5 py-10 sm:px-8">
       <header className="space-y-3">
@@ -193,6 +201,19 @@ export function LabelCheck() {
             </option>
           ))}
         </select>
+        <p className="mt-3 text-lg text-stone-800">
+          Samples are known test cases. Use them to try the tool.
+        </p>
+        {selectedSample ? (
+          <div className="mt-4 space-y-2 rounded-xl border-2 border-stone-200 bg-stone-50 px-4 py-3">
+            <p className="text-lg leading-relaxed text-stone-800">
+              {selectedSample.notes}
+            </p>
+            <p className="text-lg font-semibold text-stone-950">
+              {SAMPLE_EXPECTED[selectedSample.expected.overall]}
+            </p>
+          </div>
+        ) : null}
       </section>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">

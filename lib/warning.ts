@@ -14,6 +14,10 @@ function statuteBody(): string {
   return normalizeWhitespace(STATUTORY_WARNING.slice(PREFIX.length + 1));
 }
 
+function compactWarning(value: string): string {
+  return normalizeWhitespace(value).replace(/\s+/g, "").toLowerCase();
+}
+
 export function extractWarningPrefix(
   warningText: string,
 ): { prefix: string; body: string } | null {
@@ -26,7 +30,7 @@ export function extractWarningPrefix(
 
 export function checkGovernmentWarning(
   warningText: string | null | undefined,
-  warningAllCapsPrefix?: boolean | null,
+  _warningAllCapsPrefix?: boolean | null,
 ): FieldResult {
   const text = blankToNull(warningText);
 
@@ -55,9 +59,8 @@ export function checkGovernmentWarning(
   }
 
   const textSaysAllCaps = parts.prefix === PREFIX;
-  const modelSaysNotAllCaps = warningAllCapsPrefix === false;
 
-  if (!textSaysAllCaps || modelSaysNotAllCaps) {
+  if (!textSaysAllCaps) {
     return {
       field: "warning",
       label: FIELD_LABELS.warning,
@@ -69,7 +72,11 @@ export function checkGovernmentWarning(
     };
   }
 
-  if (parts.body !== statuteBody()) {
+  const requiredBody = statuteBody();
+  if (
+    parts.body !== requiredBody &&
+    compactWarning(parts.body) !== compactWarning(requiredBody)
+  ) {
     return {
       field: "warning",
       label: FIELD_LABELS.warning,

@@ -3,6 +3,7 @@ import {
   alcoholValuesMatch,
   nameSimilarity,
   normalizeName,
+  normalizeOrigin,
   parseAlcohol,
   parseVolume,
   volumesMatch,
@@ -18,6 +19,14 @@ describe("normalizeName", () => {
 
   it("straightens curly quotes", () => {
     expect(normalizeName("Stone’s Throw")).toBe(normalizeName("Stone's Throw"));
+  });
+});
+
+describe("normalizeOrigin", () => {
+  it("strips Product of the from a country line", () => {
+    expect(normalizeOrigin("Product of the United States")).toBe(
+      normalizeOrigin("United States"),
+    );
   });
 });
 

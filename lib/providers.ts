@@ -16,9 +16,9 @@ const PROVIDERS: Record<
   { modelId: string; envName: string; create: () => LanguageModel }
 > = {
   openai: {
-    modelId: "gpt-4o",
+    modelId: "gpt-5-nano",
     envName: "OPENAI_API_KEY",
-    create: () => openai("gpt-4o"),
+    create: () => openai("gpt-5-nano"),
   },
   google: {
     modelId: "gemini-2.5-flash",

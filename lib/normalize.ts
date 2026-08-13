@@ -18,6 +18,13 @@ export function normalizeName(value: string): string {
     .trim();
 }
 
+const ORIGIN_PREFIX =
+  /^(product of|produced in|wine of|made in|bottled in|imported from)(\s+the)?\s+/;
+
+export function normalizeOrigin(value: string): string {
+  return normalizeName(value).replace(ORIGIN_PREFIX, "").trim();
+}
+
 export function normalizeWhitespace(value: string): string {
   return value.normalize("NFKC").replace(/\s+/g, " ").trim();
 }

@@ -32,13 +32,20 @@ const extractedSchema = z.object({
     ),
 });
 
-const EXTRACT_PROMPT = `You are reading one alcohol beverage label image for a TTB compliance check.
+const SYSTEM_INSTRUCTIONS = `You are reading one alcohol beverage label image for a TTB compliance check.
 
 Transcribe only what is printed. Do not correct spelling, casing, or punctuation.
 Copy the government health warning character for character when it is present.
+Copy the first two words of the warning exactly as printed. If they are "Government Warning", write "Government Warning". Do not change that into "GOVERNMENT WARNING".
 Set warningAllCapsPrefix to true only if those first two words are GOVERNMENT WARNING in all caps.
-If the image is too washed out, glare-covered, or otherwise unreadable, set readable to false and leave the fields null.
+classType is the beverage class or type, such as Kentucky Straight Bourbon Whiskey, Cabernet Sauvignon, or Pale Ale. It is never words like DISTILLERY, BREWING CO, VINEYARDS, or EST.
+fancifulName is an extra product name besides the brand. A region such as NAPA VALLEY is not a fanciful name. Repeat of the brand is not a fanciful name. If none, return null.
+bottlerNameAddress is the name and street or city address of the bottler or producer. A country name alone is not a bottler address.
+countryOfOrigin is only the country name used as origin (for example "United States" or "France"). If the label says "Product of the United States", return "United States", not the whole phrase. A city or state in a bottler address is not country of origin. If origin is not printed, return null. Do not infer USA.
+If the image is too washed out, glare-covered, blurred, or otherwise unreadable, set readable to false and leave the fields null. Do not guess hidden text.
 If a field is not on this image, return null for that field.`;
+
+const USER_PROMPT = "Read this label and extract the printed fields.";
 
 export async function extractLabel(
   image: Buffer,
@@ -49,12 +56,16 @@ export async function extractLabel(
   const result = await generateText({
     model,
     output: Output.object({ schema: extractedSchema }),
+    system: SYSTEM_INSTRUCTIONS,
+    providerOptions: {
+      openai: { reasoningEffort: "minimal" },
+    },
     messages: [
       {
         role: "user",
         content: [
-          { type: "text", text: EXTRACT_PROMPT },
-          { type: "image", image, mediaType },
+          { type: "text", text: USER_PROMPT },
+          { type: "file", data: image, mediaType },
         ],
       },
     ],

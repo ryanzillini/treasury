@@ -85,6 +85,33 @@ describe("matchLabel", () => {
     expect(result.warning.status).toBe("fail");
   });
 
+  it("matches Product of the United States to United States", () => {
+    const application: ApplicationFields = {
+      brandName: "River Bench Vineyards",
+      classType: "Cabernet Sauvignon",
+      alcoholContent: "13.5% Alc. by Vol.",
+      netContents: "750 mL",
+      countryOfOrigin: "United States",
+      productType: "wine",
+    };
+    const extracted: ExtractedLabel = {
+      brandName: "RIVER BENCH VINEYARDS",
+      fancifulName: null,
+      classType: "Cabernet Sauvignon",
+      alcoholContent: "13.5% Alc. by Vol.",
+      netContents: "75 cl",
+      bottlerNameAddress: null,
+      countryOfOrigin: "Product of the United States",
+      warningText: STATUTORY_WARNING,
+      warningAllCapsPrefix: true,
+      readable: true,
+    };
+
+    const result = matchLabel(application, extracted, META);
+    expect(fieldStatus(result, "countryOfOrigin")).toBe("match");
+    expect(result.status).toBe("match");
+  });
+
   it("matches a clean wine label", () => {
     const application: ApplicationFields = {
       brandName: "River Bench Vineyards",
@@ -152,12 +179,39 @@ describe("matchLabel", () => {
     expect(result.message).toContain("could not read");
   });
 
-  it("matches class/type when one name contains the other", () => {
+  it("skips optional fields the application did not include", () => {
     const result = matchLabel(
       SPIRITS_APP,
-      { ...SPIRITS_LABEL, classType: "Bourbon" },
+      { ...SPIRITS_LABEL, countryOfOrigin: "United States" },
       META,
     );
-    expect(fieldStatus(result, "classType")).toBe("match");
+    expect(fieldStatus(result, "countryOfOrigin")).toBeUndefined();
+    expect(result.status).toBe("match");
+  });
+
+  it("treats a country stored in the bottler field as origin when the application has a country", () => {
+    const application: ApplicationFields = {
+      brandName: "River Bench Vineyards",
+      classType: "Cabernet Sauvignon",
+      alcoholContent: "13.5% Alc. by Vol.",
+      netContents: "750 mL",
+      countryOfOrigin: "United States",
+      productType: "wine",
+    };
+    const extracted: ExtractedLabel = {
+      brandName: "RIVER BENCH VINEYARDS",
+      fancifulName: "NAPA VALLEY",
+      classType: "Cabernet Sauvignon",
+      alcoholContent: "13.5% Alc. by Vol.",
+      netContents: "75 cl",
+      bottlerNameAddress: "United States",
+      countryOfOrigin: null,
+      warningText: STATUTORY_WARNING,
+      warningAllCapsPrefix: true,
+      readable: true,
+    };
+    const result = matchLabel(application, extracted, META);
+    expect(fieldStatus(result, "countryOfOrigin")).toBe("match");
+    expect(result.status).toBe("match");
   });
 });

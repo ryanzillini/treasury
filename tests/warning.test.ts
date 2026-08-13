@@ -20,6 +20,11 @@ describe("checkGovernmentWarning", () => {
     expect(checkGovernmentWarning(spaced).status).toBe("match");
   });
 
+  it("matches when OCR inserts a space inside a statutory word", () => {
+    const broken = STATUTORY_WARNING.replace("impairs", "impair s");
+    expect(checkGovernmentWarning(broken).status).toBe("match");
+  });
+
   it("fails when the warning is missing", () => {
     const result = checkGovernmentWarning(null);
     expect(result.status).toBe("fail");
@@ -32,9 +37,9 @@ describe("checkGovernmentWarning", () => {
     expect(result.reason).toContain("all capital letters");
   });
 
-  it("fails when the model reports the prefix is not all caps", () => {
+  it("trusts the transcribed prefix when the model flag is wrong", () => {
     const result = checkGovernmentWarning(STATUTORY_WARNING, false);
-    expect(result.status).toBe("fail");
+    expect(result.status).toBe("match");
   });
 
   it("fails a paraphrased warning", () => {
