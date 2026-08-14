@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FIXTURES } from "@/lib/fixtures";
 import {
   PRODUCT_TYPE_LABELS,
@@ -68,8 +68,8 @@ export function LabelCheck() {
   const [result, setResult] = useState<VerifyResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
-
   const [fileInputKey, setFileInputKey] = useState(0);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const canCheck = useMemo(() => {
     if (!file) return false;
@@ -87,18 +87,18 @@ export function LabelCheck() {
 
   const canClear = Boolean(
     sampleId ||
-    file ||
-    preview ||
-    result ||
-    error ||
-    application.productType !== EMPTY_APPLICATION.productType ||
-    application.brandName.trim() ||
-    application.classType.trim() ||
-    application.alcoholContent?.trim() ||
-    application.netContents.trim() ||
-    application.fancifulName?.trim() ||
-    application.bottlerNameAddress?.trim() ||
-    application.countryOfOrigin?.trim(),
+      file ||
+      preview ||
+      result ||
+      error ||
+      application.productType !== EMPTY_APPLICATION.productType ||
+      application.brandName.trim() ||
+      application.classType.trim() ||
+      application.alcoholContent?.trim() ||
+      application.netContents.trim() ||
+      application.fancifulName?.trim() ||
+      application.bottlerNameAddress?.trim() ||
+      application.countryOfOrigin?.trim(),
   );
 
   function updateField<K extends keyof ApplicationFields>(
@@ -194,63 +194,69 @@ export function LabelCheck() {
 
   const selectedSample = FIXTURES.find((fixture) => fixture.id === sampleId);
 
+  useEffect(() => {
+    if (result) {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [result]);
+
   return (
-    <div className="flex flex-col gap-10 px-5 py-10 sm:px-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-10">
-        <header className="space-y-3">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-navy-700">
-            Label Check
-          </p>
-          <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-stone-950 sm:text-5xl">
-            Check that a label matches the application.
-          </h1>
-          <p className="max-w-2xl text-xl leading-relaxed text-stone-800">
-            Add the label photo, fill in what is on the application, then press
-            Check label.
-          </p>
+    <div className="flex flex-col gap-6 px-5 py-6 sm:px-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl space-y-2">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-navy-700">
+              Label Check
+            </p>
+            <h1 className="text-3xl font-semibold leading-tight text-stone-950">
+              Check that a label matches the application.
+            </h1>
+            <p className="text-lg leading-relaxed text-stone-800">
+              Add the label photo, fill in what is on the application, then
+              press Check label.
+            </p>
+          </div>
+          <div className="w-full lg:max-w-md">
+            <label
+              htmlFor="sample"
+              className="mb-1 block text-base font-semibold text-stone-950"
+            >
+              Load a sample
+            </label>
+            <select
+              id="sample"
+              value={sampleId}
+              onChange={(event) => void loadSample(event.target.value)}
+              className="min-h-12 w-full rounded-xl border-2 border-stone-400 bg-white px-3 text-lg text-stone-950"
+            >
+              <option value="">Choose a sample…</option>
+              {FIXTURES.map((fixture) => (
+                <option key={fixture.id} value={fixture.id}>
+                  {fixture.title}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-base text-stone-700">
+              Samples are known test cases. Use them to try the tool.
+            </p>
+          </div>
         </header>
 
-        <section className="rounded-2xl border-2 border-stone-300 bg-white p-5 sm:p-6">
-          <label
-            htmlFor="sample"
-            className="mb-2 block text-lg font-semibold text-stone-950"
-          >
-            Load a sample
-          </label>
-          <select
-            id="sample"
-            value={sampleId}
-            onChange={(event) => void loadSample(event.target.value)}
-            className="min-h-14 w-full rounded-xl border-2 border-stone-400 bg-white px-4 text-lg text-stone-950"
-          >
-            <option value="">Choose a sample…</option>
-            {FIXTURES.map((fixture) => (
-              <option key={fixture.id} value={fixture.id}>
-                {fixture.title}
-              </option>
-            ))}
-          </select>
-          <p className="mt-3 text-lg text-stone-800">
-            Samples are known test cases. Use them to try the tool.
-          </p>
-          {selectedSample ? (
-            <div className="mt-4 space-y-2 rounded-xl border-2 border-stone-200 bg-stone-50 px-4 py-3">
-              <p className="text-lg leading-relaxed text-stone-800">
-                {selectedSample.notes}
-              </p>
-              <p className="text-lg font-semibold text-stone-950">
-                {SAMPLE_EXPECTED[selectedSample.expected.overall]}
-              </p>
-            </div>
-          ) : null}
-        </section>
+        {selectedSample ? (
+          <div className="space-y-1 rounded-xl border-2 border-stone-200 bg-stone-50 px-4 py-3">
+            <p className="text-lg leading-relaxed text-stone-800">
+              {selectedSample.notes}
+            </p>
+            <p className="text-lg font-semibold text-stone-950">
+              {SAMPLE_EXPECTED[selectedSample.expected.overall]}
+            </p>
+          </div>
+        ) : null}
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-stone-950">
-              Label photo
-            </h2>
-            <label className="flex min-h-72 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-400 bg-white p-4 text-center">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
+          <section className="space-y-2">
+            <h2 className="text-xl font-semibold text-stone-950">Label photo</h2>
+            <label className="flex min-h-56 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-stone-400 bg-white p-4 text-center">
               <input
                 key={fileInputKey}
                 type="file"
@@ -266,10 +272,10 @@ export function LabelCheck() {
                 <img
                   src={preview}
                   alt="Label preview"
-                  className="max-h-96 w-full rounded-lg object-contain"
+                  className="max-h-64 w-full rounded-lg object-contain"
                 />
               ) : (
-                <span className="text-xl font-medium text-stone-800">
+                <span className="text-lg font-medium text-stone-800">
                   Choose a label photo
                 </span>
               )}
@@ -279,16 +285,14 @@ export function LabelCheck() {
             </p>
           </section>
 
-          <section className="space-y-5">
-            <h2 className="text-2xl font-semibold text-stone-950">
-              Application
-            </h2>
+          <section className="space-y-3">
+            <h2 className="text-xl font-semibold text-stone-950">Application</h2>
 
             <fieldset>
-              <legend className="mb-2 text-lg font-semibold text-stone-950">
+              <legend className="mb-1 text-base font-semibold text-stone-950">
                 Product type
               </legend>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 {(
                   [
                     "distilled_spirits",
@@ -300,7 +304,7 @@ export function LabelCheck() {
                   return (
                     <label
                       key={type}
-                      className={`flex min-h-14 cursor-pointer items-center justify-center rounded-xl border-2 px-3 text-lg font-semibold ${
+                      className={`flex min-h-12 cursor-pointer items-center justify-center rounded-xl border-2 px-3 text-lg font-semibold ${
                         selected
                           ? "border-navy-800 bg-navy-800 text-white"
                           : "border-stone-400 bg-white text-stone-950"
@@ -319,73 +323,75 @@ export function LabelCheck() {
                   );
                 })}
               </div>
-              <p className="mt-3 text-base text-stone-700">
+              <p className="mt-2 text-base text-stone-700">
                 Wine, beer, or spirits as filed on the application. This is
                 checked against the class or type on the label.
               </p>
             </fieldset>
 
-            <Field
-              id="brandName"
-              label="Brand name"
-              value={application.brandName}
-              onChange={(value) => updateField("brandName", value)}
-              required
-            />
-            <Field
-              id="fancifulName"
-              label="Fanciful name (if any)"
-              value={application.fancifulName ?? ""}
-              onChange={(value) => updateField("fancifulName", value)}
-            />
-            <Field
-              id="classType"
-              label="Class / type"
-              value={application.classType}
-              onChange={(value) => updateField("classType", value)}
-              required
-            />
-            <Field
-              id="alcoholContent"
-              label="Alcohol content"
-              value={application.alcoholContent ?? ""}
-              onChange={(value) => updateField("alcoholContent", value)}
-              required={application.productType !== "malt_beverage"}
-              hint={
-                application.productType === "malt_beverage"
-                  ? "Optional for beer."
-                  : undefined
-              }
-            />
-            <Field
-              id="netContents"
-              label="Net contents"
-              value={application.netContents}
-              onChange={(value) => updateField("netContents", value)}
-              required
-            />
-            <Field
-              id="bottlerNameAddress"
-              label="Bottler name and address"
-              value={application.bottlerNameAddress ?? ""}
-              onChange={(value) => updateField("bottlerNameAddress", value)}
-            />
-            <Field
-              id="countryOfOrigin"
-              label="Country of origin"
-              value={application.countryOfOrigin ?? ""}
-              onChange={(value) => updateField("countryOfOrigin", value)}
-            />
+            <div className="grid gap-x-4 gap-y-3 sm:grid-cols-2">
+              <Field
+                id="brandName"
+                label="Brand name"
+                value={application.brandName}
+                onChange={(value) => updateField("brandName", value)}
+                required
+              />
+              <Field
+                id="fancifulName"
+                label="Fanciful name (if any)"
+                value={application.fancifulName ?? ""}
+                onChange={(value) => updateField("fancifulName", value)}
+              />
+              <Field
+                id="classType"
+                label="Class / type"
+                value={application.classType}
+                onChange={(value) => updateField("classType", value)}
+                required
+              />
+              <Field
+                id="alcoholContent"
+                label="Alcohol content"
+                value={application.alcoholContent ?? ""}
+                onChange={(value) => updateField("alcoholContent", value)}
+                required={application.productType !== "malt_beverage"}
+                hint={
+                  application.productType === "malt_beverage"
+                    ? "Optional for beer."
+                    : undefined
+                }
+              />
+              <Field
+                id="netContents"
+                label="Net contents"
+                value={application.netContents}
+                onChange={(value) => updateField("netContents", value)}
+                required
+              />
+              <Field
+                id="bottlerNameAddress"
+                label="Bottler name and address"
+                value={application.bottlerNameAddress ?? ""}
+                onChange={(value) => updateField("bottlerNameAddress", value)}
+              />
+              <Field
+                id="countryOfOrigin"
+                label="Country of origin"
+                value={application.countryOfOrigin ?? ""}
+                onChange={(value) => updateField("countryOfOrigin", value)}
+              />
+            </div>
           </section>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
               onClick={() => void onCheck()}
               disabled={!canCheck || checking}
-              className="min-h-16 flex-1 rounded-2xl bg-navy-800 px-8 text-2xl font-semibold text-white enabled:hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-stone-400"
+              className="min-h-14 flex-1 rounded-xl bg-navy-800 px-8 text-2xl font-semibold text-white enabled:hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-stone-400"
             >
               {checking ? "Checking…" : "Check label"}
             </button>
@@ -394,7 +400,7 @@ export function LabelCheck() {
                 type="button"
                 onClick={clearAll}
                 disabled={checking}
-                className="min-h-16 rounded-2xl border-2 border-stone-400 bg-white px-8 text-2xl font-semibold text-stone-950 enabled:hover:bg-stone-100 disabled:cursor-not-allowed disabled:text-stone-400 sm:min-w-48"
+                className="min-h-14 rounded-xl border-2 border-stone-400 bg-white px-8 text-2xl font-semibold text-stone-950 enabled:hover:bg-stone-100 disabled:cursor-not-allowed disabled:text-stone-400 sm:min-w-40"
               >
                 Clear
               </button>
@@ -413,7 +419,7 @@ export function LabelCheck() {
         {error && (
           <p
             role="alert"
-            className="rounded-2xl border-2 border-red-800 bg-red-100 px-5 py-4 text-xl text-red-950"
+            className="rounded-xl border-2 border-red-800 bg-red-100 px-4 py-3 text-base text-red-950"
           >
             {error}
           </p>
@@ -421,7 +427,7 @@ export function LabelCheck() {
       </div>
 
       {result ? (
-        <div className="mx-auto w-full max-w-6xl">
+        <div ref={resultsRef} className="mx-auto w-full max-w-6xl">
           <Results result={result} />
         </div>
       ) : null}
@@ -448,7 +454,7 @@ function Field({
     <div>
       <label
         htmlFor={id}
-        className="mb-2 block text-lg font-semibold text-stone-950"
+        className="mb-1 block text-base font-semibold text-stone-950"
       >
         {label}
         {required ? " *" : ""}
@@ -458,7 +464,7 @@ function Field({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         required={required}
-        className="min-h-14 w-full rounded-xl border-2 border-stone-400 bg-white px-4 text-lg text-stone-950"
+        className="min-h-12 w-full rounded-xl border-2 border-stone-400 bg-white px-3 text-lg text-stone-950"
       />
       {hint ? <p className="mt-1 text-base text-stone-700">{hint}</p> : null}
     </div>
