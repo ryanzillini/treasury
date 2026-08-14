@@ -1,7 +1,7 @@
 import {
   alcoholValuesMatch,
   blankToNull,
-  inferProductType,
+  classifyProductType,
   nameSimilarity,
   normalizeName,
   normalizeOrigin,
@@ -139,13 +139,29 @@ function compareProductType(
   application: ApplicationFields,
   extracted: ExtractedLabel,
 ): FieldResult | null {
-  const inferred = inferProductType(extracted.classType);
-  if (!inferred) return null;
-
+  const classified = classifyProductType(extracted.classType);
   const applicationValue = PRODUCT_TYPE_LABELS[application.productType];
-  const labelValue = PRODUCT_TYPE_LABELS[inferred];
 
-  if (inferred === application.productType) {
+  if (classified.kind === "unknown") return null;
+
+  if (classified.kind === "ambiguous") {
+    const labelValue = classified.candidates
+      .map((candidate) => PRODUCT_TYPE_LABELS[candidate])
+      .join(" or ");
+    return {
+      field: "productType",
+      label: FIELD_LABELS.productType,
+      status: "needs_review",
+      applicationValue,
+      labelValue,
+      reason:
+        "The class or type on the label could belong to more than one product type. An agent should confirm.",
+    };
+  }
+
+  const labelValue = PRODUCT_TYPE_LABELS[classified.productType];
+
+  if (classified.productType === application.productType) {
     return {
       field: "productType",
       label: FIELD_LABELS.productType,

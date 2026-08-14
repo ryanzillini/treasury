@@ -32,6 +32,39 @@ function fieldStatus(result: ReturnType<typeof matchLabel>, field: string) {
 }
 
 describe("matchLabel", () => {
+  it("matches a beer barley wine filed as beer", () => {
+    const result = matchLabel(
+      {
+        brandName: "Harbor Light",
+        classType: "Barley Wine",
+        alcoholContent: "10% Alc./Vol.",
+        netContents: "12 fl oz",
+        productType: "malt_beverage",
+      },
+      {
+        ...SPIRITS_LABEL,
+        brandName: "Harbor Light",
+        classType: "Barley Wine",
+        alcoholContent: "10% Alc./Vol.",
+        netContents: "12 fl oz",
+        bottlerNameAddress: null,
+      },
+      META,
+    );
+    expect(fieldStatus(result, "productType")).toBe("match");
+    expect(result.status).not.toBe("fail");
+  });
+
+  it("needs review when class/type could be more than one product type", () => {
+    const result = matchLabel(
+      { ...SPIRITS_APP, classType: "Port Ale", productType: "malt_beverage" },
+      { ...SPIRITS_LABEL, classType: "Port Ale" },
+      META,
+    );
+    expect(fieldStatus(result, "productType")).toBe("needs_review");
+    expect(result.status).toBe("needs_review");
+  });
+
   it("fails when a spirits label is filed as beer", () => {
     const result = matchLabel(
       { ...SPIRITS_APP, productType: "malt_beverage" },

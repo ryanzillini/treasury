@@ -79,30 +79,58 @@ const BEER_TERMS = [
   "malt liquor",
 ];
 
+const BEER_WINE_STYLE = /(?:^|\s)(?:barley|wheat|rye)\s+wine(?:\s|$)/;
+const SPIRIT_TERMS_AMBIGUOUS_WITH_BEER = new Set(["scotch", "bourbon"]);
+
 function hasTerm(normalized: string, term: string): boolean {
   const escaped = term.replace(/\s+/g, "\\s+");
   return new RegExp(`(?:^|\\s)${escaped}(?:\\s|$)`).test(normalized);
 }
 
+export type ProductTypeInference =
+  | { kind: "known"; productType: ProductType }
+  | { kind: "ambiguous"; candidates: ProductType[] }
+  | { kind: "unknown" };
+
+export function classifyProductType(
+  classType: string | null | undefined,
+): ProductTypeInference {
+  const text = classType ? normalizeName(classType) : "";
+  if (!text) return { kind: "unknown" };
+
+  const hasBeerWineStyle = BEER_WINE_STYLE.test(text);
+  const wineScanText = text
+    .replace(/(?:^|\s)(?:barley|wheat|rye)\s+wine(?=\s|$)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const beerHit =
+    hasBeerWineStyle || BEER_TERMS.some((term) => hasTerm(text, term));
+  const wineHit = WINE_TERMS.some((term) => hasTerm(wineScanText, term));
+  const spiritTerms = beerHit
+    ? SPIRIT_TERMS.filter((term) => !SPIRIT_TERMS_AMBIGUOUS_WITH_BEER.has(term))
+    : SPIRIT_TERMS;
+  const spiritHit = spiritTerms.some((term) => hasTerm(text, term));
+
+  const hits: ProductType[] = [];
+  if (spiritHit) hits.push("distilled_spirits");
+  if (wineHit) hits.push("wine");
+  if (beerHit) hits.push("malt_beverage");
+
+  if (hits.length === 1) {
+    return { kind: "known", productType: hits[0] };
+  }
+  if (hits.length > 1) {
+    return { kind: "ambiguous", candidates: hits };
+  }
+  return { kind: "unknown" };
+}
+
 export function inferProductType(
   classType: string | null | undefined,
 ): ProductType | null {
-  const text = classType ? normalizeName(classType) : "";
-  if (!text) return null;
-
-  const hits = new Set<ProductType>();
-  if (SPIRIT_TERMS.some((term) => hasTerm(text, term))) {
-    hits.add("distilled_spirits");
-  }
-  if (WINE_TERMS.some((term) => hasTerm(text, term))) {
-    hits.add("wine");
-  }
-  if (BEER_TERMS.some((term) => hasTerm(text, term))) {
-    hits.add("malt_beverage");
-  }
-
-  if (hits.size === 1) return [...hits][0];
-  return null;
+  const result = classifyProductType(classType);
+  return result.kind === "known" ? result.productType : null;
 }
 
 export function normalizeWhitespace(value: string): string {

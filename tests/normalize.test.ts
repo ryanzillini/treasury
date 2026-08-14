@@ -39,6 +39,22 @@ describe("inferProductType", () => {
     expect(inferProductType("Pale Ale")).toBe("malt_beverage");
     expect(inferProductType("Cabernet Sauvignon")).toBe("wine");
   });
+
+  it("treats barley wine and wheat wine as beer, not wine", () => {
+    expect(inferProductType("Barley Wine")).toBe("malt_beverage");
+    expect(inferProductType("Wheat Wine")).toBe("malt_beverage");
+    expect(inferProductType("American Barley Wine")).toBe("malt_beverage");
+  });
+
+  it("treats scotch ale and bourbon county stout as beer", () => {
+    expect(inferProductType("Scotch Ale")).toBe("malt_beverage");
+    expect(inferProductType("Bourbon County Stout")).toBe("malt_beverage");
+  });
+
+  it("still reads scotch whisky and table wine correctly", () => {
+    expect(inferProductType("Scotch Whisky")).toBe("distilled_spirits");
+    expect(inferProductType("Table Wine")).toBe("wine");
+  });
 });
 
 describe("nameSimilarity", () => {
