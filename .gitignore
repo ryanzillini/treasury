@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Next.js writes these for AI coding assistants during `next dev`.
+# They are not part of the app and should not ship in the take-home repo.
+/AGENTS.md
+/CLAUDE.md
