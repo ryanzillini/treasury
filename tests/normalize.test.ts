@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   alcoholValuesMatch,
+  inferProductType,
   nameSimilarity,
   normalizeName,
   normalizeOrigin,
@@ -27,6 +28,16 @@ describe("normalizeOrigin", () => {
     expect(normalizeOrigin("Product of the United States")).toBe(
       normalizeOrigin("United States"),
     );
+  });
+});
+
+describe("inferProductType", () => {
+  it("reads bourbon as spirits and pale ale as beer", () => {
+    expect(inferProductType("Kentucky Straight Bourbon Whiskey")).toBe(
+      "distilled_spirits",
+    );
+    expect(inferProductType("Pale Ale")).toBe("malt_beverage");
+    expect(inferProductType("Cabernet Sauvignon")).toBe("wine");
   });
 });
 

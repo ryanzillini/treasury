@@ -70,6 +70,7 @@ The original assignment notes are in [docs/assignment.md](docs/assignment.md).
 
 ## Matching rules (short)
 
+- **Product type:** wine, beer, or spirits on the application must agree with the class or type on the label (bourbon is spirits, not beer).
 - **Brand / bottler / origin:** ignore case and punctuation. Very close names match. Similar-but-uncertain names need review.
 - **Class / type:** same, and “Bourbon” matches “Kentucky Straight Bourbon Whiskey”.
 - **Alcohol:** compare the percent (and proof when both are present). Wine and spirits must show it. Beer may omit it — that needs review, not a fail.

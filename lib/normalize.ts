@@ -1,3 +1,5 @@
+import type { ProductType } from "./types";
+
 const CURLY_SINGLE = /[\u2018\u2019\u201A\u201B]/g;
 const CURLY_DOUBLE = /[\u201C\u201D\u201E\u201F]/g;
 
@@ -23,6 +25,84 @@ const ORIGIN_PREFIX =
 
 export function normalizeOrigin(value: string): string {
   return normalizeName(value).replace(ORIGIN_PREFIX, "").trim();
+}
+
+const SPIRIT_TERMS = [
+  "whiskey",
+  "whisky",
+  "bourbon",
+  "scotch",
+  "rum",
+  "gin",
+  "vodka",
+  "brandy",
+  "cognac",
+  "tequila",
+  "mezcal",
+  "liqueur",
+  "cordial",
+  "moonshine",
+  "spirit",
+  "spirits",
+];
+
+const WINE_TERMS = [
+  "wine",
+  "cabernet",
+  "merlot",
+  "chardonnay",
+  "pinot",
+  "sauvignon",
+  "riesling",
+  "zinfandel",
+  "champagne",
+  "sparkling",
+  "prosecco",
+  "sherry",
+  "port",
+  "vermouth",
+  "moscato",
+  "syrah",
+  "malbec",
+];
+
+const BEER_TERMS = [
+  "beer",
+  "ale",
+  "lager",
+  "stout",
+  "porter",
+  "pilsner",
+  "pilsener",
+  "ipa",
+  "malt beverage",
+  "malt liquor",
+];
+
+function hasTerm(normalized: string, term: string): boolean {
+  const escaped = term.replace(/\s+/g, "\\s+");
+  return new RegExp(`(?:^|\\s)${escaped}(?:\\s|$)`).test(normalized);
+}
+
+export function inferProductType(
+  classType: string | null | undefined,
+): ProductType | null {
+  const text = classType ? normalizeName(classType) : "";
+  if (!text) return null;
+
+  const hits = new Set<ProductType>();
+  if (SPIRIT_TERMS.some((term) => hasTerm(text, term))) {
+    hits.add("distilled_spirits");
+  }
+  if (WINE_TERMS.some((term) => hasTerm(text, term))) {
+    hits.add("wine");
+  }
+  if (BEER_TERMS.some((term) => hasTerm(text, term))) {
+    hits.add("malt_beverage");
+  }
+
+  if (hits.size === 1) return [...hits][0];
+  return null;
 }
 
 export function normalizeWhitespace(value: string): string {

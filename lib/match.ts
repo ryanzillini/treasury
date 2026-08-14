@@ -1,6 +1,7 @@
 import {
   alcoholValuesMatch,
   blankToNull,
+  inferProductType,
   nameSimilarity,
   normalizeName,
   normalizeOrigin,
@@ -10,6 +11,7 @@ import {
 } from "./normalize";
 import {
   FIELD_LABELS,
+  PRODUCT_TYPE_LABELS,
   type ApplicationFields,
   type CheckStatus,
   type ExtractedLabel,
@@ -131,6 +133,37 @@ function compareNames(
     label,
     "The names do not match.",
   );
+}
+
+function compareProductType(
+  application: ApplicationFields,
+  extracted: ExtractedLabel,
+): FieldResult | null {
+  const inferred = inferProductType(extracted.classType);
+  if (!inferred) return null;
+
+  const applicationValue = PRODUCT_TYPE_LABELS[application.productType];
+  const labelValue = PRODUCT_TYPE_LABELS[inferred];
+
+  if (inferred === application.productType) {
+    return {
+      field: "productType",
+      label: FIELD_LABELS.productType,
+      status: "match",
+      applicationValue,
+      labelValue,
+      reason: "The application product type matches the class or type on the label.",
+    };
+  }
+
+  return {
+    field: "productType",
+    label: FIELD_LABELS.productType,
+    status: "fail",
+    applicationValue,
+    labelValue,
+    reason: `The application is filed as ${applicationValue.toLowerCase()}, but the label class or type reads as ${labelValue.toLowerCase()}.`,
+  };
 }
 
 function compareAlcohol(
@@ -306,6 +339,7 @@ export function matchLabel(
   }
 
   const fields = [
+    compareProductType(application, extracted),
     compareNames("brandName", application.brandName, extracted.brandName, {
       required: true,
       containCountsAsMatch: false,

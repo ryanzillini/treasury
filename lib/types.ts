@@ -5,6 +5,7 @@ export type CheckStatus = "match" | "fail" | "needs_review";
 export type VisionProvider = "openai" | "google" | "anthropic";
 
 export type FieldKey =
+  | "productType"
   | "brandName"
   | "fancifulName"
   | "classType"
@@ -58,6 +59,7 @@ export interface VerifyResult {
 }
 
 export const FIELD_LABELS: Record<FieldKey | "warning", string> = {
+  productType: "Product type",
   brandName: "Brand name",
   fancifulName: "Fanciful name",
   classType: "Class / type",

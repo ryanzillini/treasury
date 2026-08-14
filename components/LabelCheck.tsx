@@ -55,8 +55,7 @@ function fileFromUrl(url: string, filename: string): Promise<File> {
       return response.blob();
     })
     .then(
-      (blob) =>
-        new File([blob], filename, { type: blob.type || "image/png" }),
+      (blob) => new File([blob], filename, { type: blob.type || "image/png" }),
     );
 }
 
@@ -69,6 +68,8 @@ export function LabelCheck() {
   const [result, setResult] = useState<VerifyResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+
+  const [fileInputKey, setFileInputKey] = useState(0);
 
   const canCheck = useMemo(() => {
     if (!file) return false;
@@ -83,6 +84,22 @@ export function LabelCheck() {
     }
     return true;
   }, [application, file]);
+
+  const canClear = Boolean(
+    sampleId ||
+    file ||
+    preview ||
+    result ||
+    error ||
+    application.productType !== EMPTY_APPLICATION.productType ||
+    application.brandName.trim() ||
+    application.classType.trim() ||
+    application.alcoholContent?.trim() ||
+    application.netContents.trim() ||
+    application.fancifulName?.trim() ||
+    application.bottlerNameAddress?.trim() ||
+    application.countryOfOrigin?.trim(),
+  );
 
   function updateField<K extends keyof ApplicationFields>(
     key: K,
@@ -123,6 +140,17 @@ export function LabelCheck() {
     setError(null);
     if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
     setPreview(next ? URL.createObjectURL(next) : null);
+  }
+
+  function clearAll() {
+    if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
+    setSampleId("");
+    setFile(null);
+    setPreview(null);
+    setApplication({ ...EMPTY_APPLICATION });
+    setResult(null);
+    setError(null);
+    setFileInputKey((key) => key + 1);
   }
 
   async function onCheck() {
@@ -167,7 +195,7 @@ export function LabelCheck() {
   const selectedSample = FIXTURES.find((fixture) => fixture.id === sampleId);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-5 py-10 sm:px-8">
+    <div className="mx-auto flex w-full max-w-360 flex-col gap-10 px-5 py-10 sm:px-8">
       <header className="space-y-3">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-navy-700">
           Label Check
@@ -221,6 +249,7 @@ export function LabelCheck() {
           <h2 className="text-2xl font-semibold text-stone-950">Label photo</h2>
           <label className="flex min-h-72 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-400 bg-white p-4 text-center">
             <input
+              key={fileInputKey}
               type="file"
               accept="image/png,image/jpeg,image/webp"
               className="sr-only"
@@ -248,9 +277,7 @@ export function LabelCheck() {
         </section>
 
         <section className="space-y-5">
-          <h2 className="text-2xl font-semibold text-stone-950">
-            Application
-          </h2>
+          <h2 className="text-2xl font-semibold text-stone-950">Application</h2>
 
           <fieldset>
             <legend className="mb-2 text-lg font-semibold text-stone-950">
@@ -258,11 +285,7 @@ export function LabelCheck() {
             </legend>
             <div className="grid grid-cols-3 gap-3">
               {(
-                [
-                  "distilled_spirits",
-                  "wine",
-                  "malt_beverage",
-                ] as ProductType[]
+                ["distilled_spirits", "wine", "malt_beverage"] as ProductType[]
               ).map((type) => {
                 const selected = application.productType === type;
                 return (
@@ -287,6 +310,10 @@ export function LabelCheck() {
                 );
               })}
             </div>
+            <p className="mt-3 text-base text-stone-700">
+              Wine, beer, or spirits as filed on the application. This is
+              checked against the class or type on the label.
+            </p>
           </fieldset>
 
           <Field
@@ -344,14 +371,26 @@ export function LabelCheck() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <button
-          type="button"
-          onClick={() => void onCheck()}
-          disabled={!canCheck || checking}
-          className="min-h-16 rounded-2xl bg-navy-800 px-8 text-2xl font-semibold text-white enabled:hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-stone-400"
-        >
-          {checking ? "Checking…" : "Check label"}
-        </button>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => void onCheck()}
+            disabled={!canCheck || checking}
+            className="min-h-16 flex-1 rounded-2xl bg-navy-800 px-8 text-2xl font-semibold text-white enabled:hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-stone-400"
+          >
+            {checking ? "Checking…" : "Check label"}
+          </button>
+          {canClear ? (
+            <button
+              type="button"
+              onClick={clearAll}
+              disabled={checking}
+              className="min-h-16 rounded-2xl border-2 border-stone-400 bg-white px-8 text-2xl font-semibold text-stone-950 enabled:hover:bg-stone-100 disabled:cursor-not-allowed disabled:text-stone-400 sm:min-w-48"
+            >
+              Clear
+            </button>
+          ) : null}
+        </div>
         {!canCheck && (
           <p className="text-lg text-stone-800">
             Add a photo and fill in brand name, class or type, net contents
@@ -393,7 +432,10 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-lg font-semibold text-stone-950">
+      <label
+        htmlFor={id}
+        className="mb-2 block text-lg font-semibold text-stone-950"
+      >
         {label}
         {required ? " *" : ""}
       </label>
@@ -416,9 +458,7 @@ function Results({ result }: { result: VerifyResult }) {
 
   return (
     <section className="space-y-5" aria-live="polite">
-      <div
-        className={`rounded-2xl border-2 px-5 py-6 ${overall.className}`}
-      >
+      <div className={`rounded-2xl border-2 px-5 py-6 ${overall.className}`}>
         <p className="text-lg font-semibold">{seconds} seconds</p>
         <h2 className="mt-1 text-4xl font-semibold">{overall.title}</h2>
         {result.message ? (
@@ -428,24 +468,37 @@ function Results({ result }: { result: VerifyResult }) {
 
       {rows.length > 0 && (
         <div className="overflow-x-auto rounded-2xl border-2 border-stone-300 bg-white">
-          <table className="w-full min-w-[40rem] border-collapse text-left text-lg">
+          <table className="w-full min-w-7xl table-fixed border-collapse text-left text-lg">
+            <colgroup>
+              <col className="w-[14%]" />
+              <col className="w-[33%]" />
+              <col className="w-[33%]" />
+              <col className="w-[20%]" />
+            </colgroup>
             <thead className="bg-stone-100">
               <tr>
-                <th className="px-4 py-3 font-semibold">Field</th>
-                <th className="px-4 py-3 font-semibold">Application</th>
-                <th className="px-4 py-3 font-semibold">On the label</th>
-                <th className="px-4 py-3 font-semibold">Result</th>
+                <th className="px-5 py-3 font-semibold">Field</th>
+                <th className="px-5 py-3 font-semibold">Application</th>
+                <th className="px-5 py-3 font-semibold">On the label</th>
+                <th className="px-5 py-3 font-semibold">Result</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => {
                 const copy = STATUS_COPY[row.status];
                 return (
-                  <tr key={row.field} className="border-t border-stone-200 align-top">
-                    <td className="px-4 py-4 font-semibold">{row.label}</td>
-                    <td className="px-4 py-4">{row.applicationValue ?? "—"}</td>
-                    <td className="px-4 py-4">{row.labelValue ?? "—"}</td>
-                    <td className="px-4 py-4">
+                  <tr
+                    key={row.field}
+                    className="border-t border-stone-200 align-top"
+                  >
+                    <td className="px-5 py-4 font-semibold">{row.label}</td>
+                    <td className="px-5 py-4 wrap-break-word">
+                      {row.applicationValue ?? "—"}
+                    </td>
+                    <td className="px-5 py-4 wrap-break-word">
+                      {row.labelValue ?? "—"}
+                    </td>
+                    <td className="px-5 py-4">
                       <span
                         className={`inline-block rounded-full px-3 py-1 text-base font-semibold ${copy.chip}`}
                       >

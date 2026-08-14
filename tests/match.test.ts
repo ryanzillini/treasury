@@ -32,6 +32,16 @@ function fieldStatus(result: ReturnType<typeof matchLabel>, field: string) {
 }
 
 describe("matchLabel", () => {
+  it("fails when a spirits label is filed as beer", () => {
+    const result = matchLabel(
+      { ...SPIRITS_APP, productType: "malt_beverage" },
+      SPIRITS_LABEL,
+      META,
+    );
+    expect(result.status).toBe("fail");
+    expect(fieldStatus(result, "productType")).toBe("fail");
+  });
+
   it("matches a clean spirits label against the application", () => {
     const result = matchLabel(SPIRITS_APP, SPIRITS_LABEL, META);
     expect(result.status).toBe("match");
