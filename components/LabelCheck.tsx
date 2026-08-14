@@ -195,7 +195,7 @@ export function LabelCheck() {
   const selectedSample = FIXTURES.find((fixture) => fixture.id === sampleId);
 
   return (
-    <div className="mx-auto flex w-full max-w-360 flex-col gap-10 px-5 py-10 sm:px-8">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-5 py-10 sm:px-8">
       <header className="space-y-3">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-navy-700">
           Label Check
@@ -467,52 +467,61 @@ function Results({ result }: { result: VerifyResult }) {
       </div>
 
       {rows.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl border-2 border-stone-300 bg-white">
-          <table className="w-full min-w-7xl table-fixed border-collapse text-left text-lg">
-            <colgroup>
-              <col className="w-[14%]" />
-              <col className="w-[33%]" />
-              <col className="w-[33%]" />
-              <col className="w-[20%]" />
-            </colgroup>
-            <thead className="bg-stone-100">
-              <tr>
-                <th className="px-5 py-3 font-semibold">Field</th>
-                <th className="px-5 py-3 font-semibold">Application</th>
-                <th className="px-5 py-3 font-semibold">On the label</th>
-                <th className="px-5 py-3 font-semibold">Result</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => {
-                const copy = STATUS_COPY[row.status];
-                return (
-                  <tr
-                    key={row.field}
-                    className="border-t border-stone-200 align-top"
-                  >
-                    <td className="px-5 py-4 font-semibold">{row.label}</td>
-                    <td className="px-5 py-4 wrap-break-word">
-                      {row.applicationValue ?? "—"}
-                    </td>
-                    <td className="px-5 py-4 wrap-break-word">
-                      {row.labelValue ?? "—"}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-block rounded-full px-3 py-1 text-base font-semibold ${copy.chip}`}
-                      >
-                        {copy.title}
-                      </span>
-                      <p className="mt-2 text-base leading-relaxed text-stone-800">
-                        {row.reason}
+        <div className="overflow-hidden rounded-2xl border-2 border-stone-300 bg-white">
+          <div className="border-b-2 border-stone-200 bg-stone-100 px-5 py-3">
+            <h3 className="text-lg font-semibold text-stone-950">
+              Field by field
+            </h3>
+          </div>
+          <ul className="divide-y divide-stone-200">
+            {rows.map((row) => {
+              const copy = STATUS_COPY[row.status];
+              const accent =
+                row.status === "match"
+                  ? "border-l-emerald-800"
+                  : row.status === "fail"
+                    ? "border-l-red-800"
+                    : "border-l-amber-700";
+              return (
+                <li
+                  key={row.field}
+                  className={`border-l-4 px-5 py-5 ${accent}`}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-xl font-semibold text-stone-950">
+                      {row.label}
+                    </p>
+                    <span
+                      className={`inline-block rounded-full px-3 py-1 text-base font-semibold ${copy.chip}`}
+                    >
+                      {copy.title}
+                    </span>
+                  </div>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-wide text-stone-600">
+                        Application
                       </p>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      <p className="mt-1 text-lg leading-relaxed wrap-break-word text-stone-950">
+                        {row.applicationValue ?? "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-wide text-stone-600">
+                        On the label
+                      </p>
+                      <p className="mt-1 text-lg leading-relaxed wrap-break-word text-stone-950">
+                        {row.labelValue ?? "—"}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-base leading-relaxed text-stone-700">
+                    {row.reason}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
 
