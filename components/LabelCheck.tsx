@@ -195,222 +195,236 @@ export function LabelCheck() {
   const selectedSample = FIXTURES.find((fixture) => fixture.id === sampleId);
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-5 py-10 sm:px-8">
-      <header className="space-y-3">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-navy-700">
-          Label Check
-        </p>
-        <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-stone-950 sm:text-5xl">
-          Check that a label matches the application.
-        </h1>
-        <p className="max-w-2xl text-xl leading-relaxed text-stone-800">
-          Add the label photo, fill in what is on the application, then press
-          Check label.
-        </p>
-      </header>
+    <div className="flex flex-col gap-10 px-5 py-10 sm:px-8">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-10">
+        <header className="space-y-3">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-navy-700">
+            Label Check
+          </p>
+          <h1 className="max-w-3xl text-4xl font-semibold leading-tight text-stone-950 sm:text-5xl">
+            Check that a label matches the application.
+          </h1>
+          <p className="max-w-2xl text-xl leading-relaxed text-stone-800">
+            Add the label photo, fill in what is on the application, then press
+            Check label.
+          </p>
+        </header>
 
-      <section className="rounded-2xl border-2 border-stone-300 bg-white p-5 sm:p-6">
-        <label
-          htmlFor="sample"
-          className="mb-2 block text-lg font-semibold text-stone-950"
-        >
-          Load a sample
-        </label>
-        <select
-          id="sample"
-          value={sampleId}
-          onChange={(event) => void loadSample(event.target.value)}
-          className="min-h-14 w-full rounded-xl border-2 border-stone-400 bg-white px-4 text-lg text-stone-950"
-        >
-          <option value="">Choose a sample…</option>
-          {FIXTURES.map((fixture) => (
-            <option key={fixture.id} value={fixture.id}>
-              {fixture.title}
-            </option>
-          ))}
-        </select>
-        <p className="mt-3 text-lg text-stone-800">
-          Samples are known test cases. Use them to try the tool.
-        </p>
-        {selectedSample ? (
-          <div className="mt-4 space-y-2 rounded-xl border-2 border-stone-200 bg-stone-50 px-4 py-3">
-            <p className="text-lg leading-relaxed text-stone-800">
-              {selectedSample.notes}
-            </p>
-            <p className="text-lg font-semibold text-stone-950">
-              {SAMPLE_EXPECTED[selectedSample.expected.overall]}
-            </p>
-          </div>
-        ) : null}
-      </section>
+        <section className="rounded-2xl border-2 border-stone-300 bg-white p-5 sm:p-6">
+          <label
+            htmlFor="sample"
+            className="mb-2 block text-lg font-semibold text-stone-950"
+          >
+            Load a sample
+          </label>
+          <select
+            id="sample"
+            value={sampleId}
+            onChange={(event) => void loadSample(event.target.value)}
+            className="min-h-14 w-full rounded-xl border-2 border-stone-400 bg-white px-4 text-lg text-stone-950"
+          >
+            <option value="">Choose a sample…</option>
+            {FIXTURES.map((fixture) => (
+              <option key={fixture.id} value={fixture.id}>
+                {fixture.title}
+              </option>
+            ))}
+          </select>
+          <p className="mt-3 text-lg text-stone-800">
+            Samples are known test cases. Use them to try the tool.
+          </p>
+          {selectedSample ? (
+            <div className="mt-4 space-y-2 rounded-xl border-2 border-stone-200 bg-stone-50 px-4 py-3">
+              <p className="text-lg leading-relaxed text-stone-800">
+                {selectedSample.notes}
+              </p>
+              <p className="text-lg font-semibold text-stone-950">
+                {SAMPLE_EXPECTED[selectedSample.expected.overall]}
+              </p>
+            </div>
+          ) : null}
+        </section>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-stone-950">Label photo</h2>
-          <label className="flex min-h-72 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-400 bg-white p-4 text-center">
-            <input
-              key={fileInputKey}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="sr-only"
-              onChange={(event) =>
-                onFileChange(event.target.files?.[0] ?? null)
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-stone-950">
+              Label photo
+            </h2>
+            <label className="flex min-h-72 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-400 bg-white p-4 text-center">
+              <input
+                key={fileInputKey}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="sr-only"
+                onChange={(event) =>
+                  onFileChange(event.target.files?.[0] ?? null)
+                }
+              />
+              {preview ? (
+                // Sample and upload previews are local files, not remote assets.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={preview}
+                  alt="Label preview"
+                  className="max-h-96 w-full rounded-lg object-contain"
+                />
+              ) : (
+                <span className="text-xl font-medium text-stone-800">
+                  Choose a label photo
+                </span>
+              )}
+            </label>
+            <p className="text-base text-stone-700">
+              PNG, JPG, or WebP. Up to 4 MB.
+            </p>
+          </section>
+
+          <section className="space-y-5">
+            <h2 className="text-2xl font-semibold text-stone-950">
+              Application
+            </h2>
+
+            <fieldset>
+              <legend className="mb-2 text-lg font-semibold text-stone-950">
+                Product type
+              </legend>
+              <div className="grid grid-cols-3 gap-3">
+                {(
+                  [
+                    "distilled_spirits",
+                    "wine",
+                    "malt_beverage",
+                  ] as ProductType[]
+                ).map((type) => {
+                  const selected = application.productType === type;
+                  return (
+                    <label
+                      key={type}
+                      className={`flex min-h-14 cursor-pointer items-center justify-center rounded-xl border-2 px-3 text-lg font-semibold ${
+                        selected
+                          ? "border-navy-800 bg-navy-800 text-white"
+                          : "border-stone-400 bg-white text-stone-950"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="productType"
+                        value={type}
+                        checked={selected}
+                        onChange={() => updateField("productType", type)}
+                        className="sr-only"
+                      />
+                      {PRODUCT_TYPE_LABELS[type]}
+                    </label>
+                  );
+                })}
+              </div>
+              <p className="mt-3 text-base text-stone-700">
+                Wine, beer, or spirits as filed on the application. This is
+                checked against the class or type on the label.
+              </p>
+            </fieldset>
+
+            <Field
+              id="brandName"
+              label="Brand name"
+              value={application.brandName}
+              onChange={(value) => updateField("brandName", value)}
+              required
+            />
+            <Field
+              id="fancifulName"
+              label="Fanciful name (if any)"
+              value={application.fancifulName ?? ""}
+              onChange={(value) => updateField("fancifulName", value)}
+            />
+            <Field
+              id="classType"
+              label="Class / type"
+              value={application.classType}
+              onChange={(value) => updateField("classType", value)}
+              required
+            />
+            <Field
+              id="alcoholContent"
+              label="Alcohol content"
+              value={application.alcoholContent ?? ""}
+              onChange={(value) => updateField("alcoholContent", value)}
+              required={application.productType !== "malt_beverage"}
+              hint={
+                application.productType === "malt_beverage"
+                  ? "Optional for beer."
+                  : undefined
               }
             />
-            {preview ? (
-              // Sample and upload previews are local files, not remote assets.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={preview}
-                alt="Label preview"
-                className="max-h-96 w-full rounded-lg object-contain"
-              />
-            ) : (
-              <span className="text-xl font-medium text-stone-800">
-                Choose a label photo
-              </span>
-            )}
-          </label>
-          <p className="text-base text-stone-700">
-            PNG, JPG, or WebP. Up to 4 MB.
-          </p>
-        </section>
+            <Field
+              id="netContents"
+              label="Net contents"
+              value={application.netContents}
+              onChange={(value) => updateField("netContents", value)}
+              required
+            />
+            <Field
+              id="bottlerNameAddress"
+              label="Bottler name and address"
+              value={application.bottlerNameAddress ?? ""}
+              onChange={(value) => updateField("bottlerNameAddress", value)}
+            />
+            <Field
+              id="countryOfOrigin"
+              label="Country of origin"
+              value={application.countryOfOrigin ?? ""}
+              onChange={(value) => updateField("countryOfOrigin", value)}
+            />
+          </section>
+        </div>
 
-        <section className="space-y-5">
-          <h2 className="text-2xl font-semibold text-stone-950">Application</h2>
-
-          <fieldset>
-            <legend className="mb-2 text-lg font-semibold text-stone-950">
-              Product type
-            </legend>
-            <div className="grid grid-cols-3 gap-3">
-              {(
-                ["distilled_spirits", "wine", "malt_beverage"] as ProductType[]
-              ).map((type) => {
-                const selected = application.productType === type;
-                return (
-                  <label
-                    key={type}
-                    className={`flex min-h-14 cursor-pointer items-center justify-center rounded-xl border-2 px-3 text-lg font-semibold ${
-                      selected
-                        ? "border-navy-800 bg-navy-800 text-white"
-                        : "border-stone-400 bg-white text-stone-950"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="productType"
-                      value={type}
-                      checked={selected}
-                      onChange={() => updateField("productType", type)}
-                      className="sr-only"
-                    />
-                    {PRODUCT_TYPE_LABELS[type]}
-                  </label>
-                );
-              })}
-            </div>
-            <p className="mt-3 text-base text-stone-700">
-              Wine, beer, or spirits as filed on the application. This is
-              checked against the class or type on the label.
-            </p>
-          </fieldset>
-
-          <Field
-            id="brandName"
-            label="Brand name"
-            value={application.brandName}
-            onChange={(value) => updateField("brandName", value)}
-            required
-          />
-          <Field
-            id="fancifulName"
-            label="Fanciful name (if any)"
-            value={application.fancifulName ?? ""}
-            onChange={(value) => updateField("fancifulName", value)}
-          />
-          <Field
-            id="classType"
-            label="Class / type"
-            value={application.classType}
-            onChange={(value) => updateField("classType", value)}
-            required
-          />
-          <Field
-            id="alcoholContent"
-            label="Alcohol content"
-            value={application.alcoholContent ?? ""}
-            onChange={(value) => updateField("alcoholContent", value)}
-            required={application.productType !== "malt_beverage"}
-            hint={
-              application.productType === "malt_beverage"
-                ? "Optional for beer."
-                : undefined
-            }
-          />
-          <Field
-            id="netContents"
-            label="Net contents"
-            value={application.netContents}
-            onChange={(value) => updateField("netContents", value)}
-            required
-          />
-          <Field
-            id="bottlerNameAddress"
-            label="Bottler name and address"
-            value={application.bottlerNameAddress ?? ""}
-            onChange={(value) => updateField("bottlerNameAddress", value)}
-          />
-          <Field
-            id="countryOfOrigin"
-            label="Country of origin"
-            value={application.countryOfOrigin ?? ""}
-            onChange={(value) => updateField("countryOfOrigin", value)}
-          />
-        </section>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            onClick={() => void onCheck()}
-            disabled={!canCheck || checking}
-            className="min-h-16 flex-1 rounded-2xl bg-navy-800 px-8 text-2xl font-semibold text-white enabled:hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-stone-400"
-          >
-            {checking ? "Checking…" : "Check label"}
-          </button>
-          {canClear ? (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <button
               type="button"
-              onClick={clearAll}
-              disabled={checking}
-              className="min-h-16 rounded-2xl border-2 border-stone-400 bg-white px-8 text-2xl font-semibold text-stone-950 enabled:hover:bg-stone-100 disabled:cursor-not-allowed disabled:text-stone-400 sm:min-w-48"
+              onClick={() => void onCheck()}
+              disabled={!canCheck || checking}
+              className="min-h-16 flex-1 rounded-2xl bg-navy-800 px-8 text-2xl font-semibold text-white enabled:hover:bg-navy-900 disabled:cursor-not-allowed disabled:bg-stone-400"
             >
-              Clear
+              {checking ? "Checking…" : "Check label"}
             </button>
-          ) : null}
+            {canClear ? (
+              <button
+                type="button"
+                onClick={clearAll}
+                disabled={checking}
+                className="min-h-16 rounded-2xl border-2 border-stone-400 bg-white px-8 text-2xl font-semibold text-stone-950 enabled:hover:bg-stone-100 disabled:cursor-not-allowed disabled:text-stone-400 sm:min-w-48"
+              >
+                Clear
+              </button>
+            ) : null}
+          </div>
+          {!canCheck && (
+            <p className="text-lg text-stone-800">
+              Add a photo and fill in brand name, class or type, net contents
+              {application.productType === "malt_beverage"
+                ? "."
+                : ", and alcohol content."}
+            </p>
+          )}
         </div>
-        {!canCheck && (
-          <p className="text-lg text-stone-800">
-            Add a photo and fill in brand name, class or type, net contents
-            {application.productType === "malt_beverage"
-              ? "."
-              : ", and alcohol content."}
+
+        {error && (
+          <p
+            role="alert"
+            className="rounded-2xl border-2 border-red-800 bg-red-100 px-5 py-4 text-xl text-red-950"
+          >
+            {error}
           </p>
         )}
       </div>
 
-      {error && (
-        <p
-          role="alert"
-          className="rounded-2xl border-2 border-red-800 bg-red-100 px-5 py-4 text-xl text-red-950"
-        >
-          {error}
-        </p>
-      )}
-
-      {result && <Results result={result} />}
+      {result ? (
+        <div className="mx-auto w-full max-w-6xl">
+          <Results result={result} />
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -467,61 +481,54 @@ function Results({ result }: { result: VerifyResult }) {
       </div>
 
       {rows.length > 0 && (
-        <div className="overflow-hidden rounded-2xl border-2 border-stone-300 bg-white">
-          <div className="border-b-2 border-stone-200 bg-stone-100 px-5 py-3">
-            <h3 className="text-lg font-semibold text-stone-950">
-              Field by field
-            </h3>
-          </div>
-          <ul className="divide-y divide-stone-200">
-            {rows.map((row) => {
-              const copy = STATUS_COPY[row.status];
-              const accent =
-                row.status === "match"
-                  ? "border-l-emerald-800"
-                  : row.status === "fail"
-                    ? "border-l-red-800"
-                    : "border-l-amber-700";
-              return (
-                <li
-                  key={row.field}
-                  className={`border-l-4 px-5 py-5 ${accent}`}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-xl font-semibold text-stone-950">
+        <div className="overflow-x-auto rounded-2xl border-2 border-stone-300 bg-white">
+          <table className="w-full table-fixed border-collapse text-left text-lg">
+            <colgroup>
+              <col className="w-[16%]" />
+              <col className="w-[29%]" />
+              <col className="w-[29%]" />
+              <col className="w-[26%]" />
+            </colgroup>
+            <thead className="bg-stone-100">
+              <tr>
+                <th className="px-4 py-3 font-semibold">Field</th>
+                <th className="px-4 py-3 font-semibold">Application</th>
+                <th className="px-4 py-3 font-semibold">On the label</th>
+                <th className="px-4 py-3 font-semibold">Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => {
+                const copy = STATUS_COPY[row.status];
+                return (
+                  <tr
+                    key={row.field}
+                    className="border-t border-stone-200 align-top"
+                  >
+                    <td className="px-4 py-4 font-semibold wrap-break-word">
                       {row.label}
-                    </p>
-                    <span
-                      className={`inline-block rounded-full px-3 py-1 text-base font-semibold ${copy.chip}`}
-                    >
-                      {copy.title}
-                    </span>
-                  </div>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-wide text-stone-600">
-                        Application
+                    </td>
+                    <td className="px-4 py-4 wrap-break-word">
+                      {row.applicationValue ?? "—"}
+                    </td>
+                    <td className="px-4 py-4 wrap-break-word">
+                      {row.labelValue ?? "—"}
+                    </td>
+                    <td className="px-4 py-4 wrap-break-word">
+                      <span
+                        className={`inline-block rounded-full px-3 py-1 text-base font-semibold ${copy.chip}`}
+                      >
+                        {copy.title}
+                      </span>
+                      <p className="mt-2 text-base leading-relaxed text-stone-800">
+                        {row.reason}
                       </p>
-                      <p className="mt-1 text-lg leading-relaxed wrap-break-word text-stone-950">
-                        {row.applicationValue ?? "—"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-wide text-stone-600">
-                        On the label
-                      </p>
-                      <p className="mt-1 text-lg leading-relaxed wrap-break-word text-stone-950">
-                        {row.labelValue ?? "—"}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="mt-3 text-base leading-relaxed text-stone-700">
-                    {row.reason}
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
